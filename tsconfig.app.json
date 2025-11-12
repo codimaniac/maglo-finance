@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    // ...
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+    // ...
+  },
+  "include": ["src/**/*"]
+}
