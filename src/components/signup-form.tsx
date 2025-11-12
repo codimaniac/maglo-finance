@@ -5,17 +5,45 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
+import { toast } from "react-toastify"
+import { createUser } from "@/appwrite/config"
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const navigate = useNavigate()
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get("password") as string;
+
+    if (!name || !email || !password) {
+      toast.error("Please fill in all required fields.");
+      return;
+    } else if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long.");
+      return;
+    }
+
+    createUser(name, email, password)
+      .then(() => {
+        toast.success("Logged in successfully!") 
+        navigate('/')
+      })
+      .catch((error) => {
+        toast.error(`${error.message}`)
+      });
+  };
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleSubmit}>
       <FieldGroup>
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold">Create your account</h1>
@@ -25,15 +53,15 @@ export function SignupForm({
         </div>
         <Field>
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
-          <Input id="name" type="text" placeholder="Mahfuzul Nabil" required />
+          <Input id="name" name="name" type="text" placeholder="Mahfuzul Nabil" required />
         </Field>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="example@gmail.com" required />
+          <Input id="email" name="email" type="email" placeholder="example@gmail.com" required />
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input id="password" type="password" required />
+          <Input id="password" name="password" type="password" placeholder="• • • • • • •" required />
         </Field>
         <Field>
           <Button type="submit" className="bg-primary text-accent-foreground cursor-pointer">Create Account</Button>
