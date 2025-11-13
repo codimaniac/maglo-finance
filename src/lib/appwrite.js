@@ -3,7 +3,7 @@ import { Client, Account, Databases, ID } from "appwrite";
 const client = new Client()
     .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
     .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
-import App from './../App';
+import App from '../App';
 
 const account = new Account(client);
 const databases = new Databases(client);
@@ -31,10 +31,10 @@ const createUser = async (userName, userEmail, userPassword) => {
 const loginUser = async (userEmail, userPassword, rememberUser) => {
     try {
         const session = await account.createEmailPasswordSession({
-            email: userEmail, 
+            email: userEmail,
             password: userPassword
         });
-        
+
         if (rememberUser) {
             localStorage.setItem('rememberMe', 'true')
         } else {
@@ -67,8 +67,10 @@ const checkSession = async () => {
         console.log('Session active:', user);
         return user; // user is logged in
     } catch (error) {
-        console.log('No active session');
-        return null; // no session
+        if (error.message == "Failed to fetch") {
+            console.error('Network connection failed!')
+        }
+        throw error; // no session
     }
 }
 
