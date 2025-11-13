@@ -1,19 +1,27 @@
 import { checkSession } from "@/lib/appwrite"
-import { useNavigate } from "react-router"
+import { useEffect, useState } from "react"
+import { Navigate } from "react-router"
+import LoadingState from "./LoadingState"
 
-const ProtectedRoute = () => {
-    const navigate = useNavigate()
-    const user = checkSession()
-
-    if (!user) {
-        return navigate('/signin')
-    }
+const ProtectedRoute = ({children}) => {    
+    const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
     
-    return (
-        <>
-            {children}
-        </>
-    )
+    useEffect(() => {
+        checkSession()
+            .then((session) => setUser(session.$id))
+            .catch(() => setUser(null))
+            .finally(() => setLoading(false))
+    }, [])
+
+    console.log(user)
+
+    
+    if (loading) return <LoadingState />
+
+    if (!user) return <Navigate to="/signin" replace />
+    
+    return children
 }
 
 export default ProtectedRoute

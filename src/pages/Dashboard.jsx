@@ -8,6 +8,9 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import data from "../app/dashboard/data.json";
 import { useEffect } from "react";
 import { account, checkSession } from "@/lib/appwrite";
+import { useDatabaseStore } from "@/store/useDatabaseStore";
+import { toast } from "react-toastify";
+import { useStateStore } from "@/store/useStateStore";
 
 /** @type {import('react').CSSProperties} */
 const style = {
@@ -16,9 +19,23 @@ const style = {
 };
 
 export default function Dashboard() {
+  const invoices = useDatabaseStore((state) => state.invoices);
+  const fetchInvoices = useDatabaseStore((state) => state.fetchInvoices);
+  const { hasShownWelcome, setHasShownWelcome } = useStateStore()
+  
   useEffect(() => {
-    checkSession().then((user) => console.log(user.email))
+    checkSession().then((user) => {
+      if (!hasShownWelcome) {
+        toast.success(`Welcome back, ${user.name || user.email}!`)
+        setHasShownWelcome(true)
+      }
+    });
+    fetchInvoices();
   }, []);
+
+  // useEffect(() => {
+  //   console.log(invoices)
+  // }, [invoices])
 
   return (
     <SidebarProvider style={style}>
@@ -32,7 +49,8 @@ export default function Dashboard() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              {/* Data Table goes here */}
+              <DataTable invoiceData={invoices}/>
             </div>
           </div>
         </div>

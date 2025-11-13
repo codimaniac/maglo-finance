@@ -8,11 +8,13 @@ import {
   IconFileDescription,
   IconFileWord,
   IconHelp,
+  IconHome,
   IconInvoice,
   IconLogout,
   IconReport,
   IconSearch,
   IconSettings,
+  IconTax,
   IconTransactionDollar,
   IconWallet,
 } from "@tabler/icons-react"
@@ -29,13 +31,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router"
+import { logoutUser } from "@/lib/appwrite"
+import { toast } from "react-toastify"
 
 const data = {
   navMain: [
     {
       title: "Dashboard",
       url: "/",
-      icon: IconDashboard,
+      icon: IconHome,
     },
     {
       title: "Transactions",
@@ -48,9 +52,9 @@ const data = {
       icon: IconInvoice,
     },
     {
-      title: "Wallets",
-      url: "/wallets",
-      icon: IconWallet,
+      title: "VAT Summaries",
+      url: "/vat-summaries",
+      icon: IconTax,
     },
     {
       title: "Settings",
@@ -63,11 +67,18 @@ const data = {
       title: "Help",
       url: "#",
       icon: IconHelp,
+      handlesignout: null,
     },
     {
       title: "Logout",
-      url: "#",
+      url: "/signin",
       icon: IconLogout,
+      handlesignout: () => {
+        logoutUser().then(() => console.log("User logged out")).catch((error) => {
+          console.error("Error logging out user:", error)
+          toast.error("Error logging out. Please try again.")
+        })
+      },
     },
   ],
 }

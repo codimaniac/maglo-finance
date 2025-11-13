@@ -15,7 +15,7 @@ const style = {
   gap: 16,
 };
 
-export default function Dashboard() {
+export default function VATSummaries() {
   useEffect(() => {
     checkSession().then((user) => console.log(user.email))
   }, []);
@@ -24,7 +24,7 @@ export default function Dashboard() {
     <SidebarProvider style={style}>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader heading="Invoices"/>
+        <SiteHeader heading="VAT Monthly Summaries"/>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">

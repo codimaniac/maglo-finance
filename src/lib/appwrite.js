@@ -64,7 +64,7 @@ const updateName = async (name) => {
 const checkSession = async () => {
     try {
         const user = await account.get();
-        console.log('Session active:', user);
+        
         return user; // user is logged in
     } catch (error) {
         if (error.message == "Failed to fetch") {
@@ -74,4 +74,15 @@ const checkSession = async () => {
     }
 }
 
-export { client, account, databases, createUser, loginUser, updateName, checkSession };
+const logoutUser = async () => {
+    try {
+        await account.deleteSession('current');
+    }
+    catch (error) {
+        console.error('Error logging out:', error.message);
+
+        throw error;
+    }
+}
+
+export { client, account, databases, createUser, loginUser, updateName, checkSession, logoutUser };

@@ -19,6 +19,7 @@ export function NavSecondary({
     title: string
     url: string
     icon: Icon
+    handlesignout: (() => void) | null
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
@@ -26,7 +27,7 @@ export function NavSecondary({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem key={item.title} onClick={item.url=="/signin" && item.handlesignout ? item.handlesignout : null}>
               <SidebarMenuButton asChild>
                 <a href={item.url}>
                   <item.icon />

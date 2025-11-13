@@ -6,8 +6,12 @@ import { FaBell } from 'react-icons/fa'
 import MaleAvatar from "../assets/default-male-avatar.png"
 import { IconCaretDownFilled } from "@tabler/icons-react"
 
+interface SiteHeaderProps {
+  heading?: string
+}
 
-export function SiteHeader() {
+
+export function SiteHeader({heading}: SiteHeaderProps) {
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 py-6 lg:gap-2 lg:px-6">
@@ -16,7 +20,7 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="font-semibold text-2xl">Dashboard</h1>
+        <h1 className="font-semibold text-2xl">{ heading }</h1>
         <div className="ml-auto flex items-center gap-8">
           <Search size={20} className="hidden text-[var(--text-2)] md:block"/>
           <FaBell size={20} className="hidden text-[var(--text-2)] md:block"/>
