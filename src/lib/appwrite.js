@@ -46,15 +46,15 @@ const loginUser = async (userEmail, userPassword, rememberUser) => {
             session.userId
         );
 
-        if (!user) {
+        if (!user.$id || !user.firstName || !user.lastName || !user.email) {
             const newUser = await databases.createDocument(
                 import.meta.env.VITE_APPWRITE_DATABASE_ID,
                 import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
                 session.userId,
                 {
-                    firstName: session.name.split(" ")[0] || "",
-                    lastName: session.name.split(" ")[1] || "",
-                    email: session.email
+                    firstName: session.name?.split(" ")[0] || "",
+                    lastName: session.name?.split(" ")[1] || "",
+                    email: session?.email
                 }
             );
 
@@ -97,9 +97,13 @@ const checkSession = async () => {
 
         return user; // user is logged in
     } catch (error) {
+        if (error.code === 401) {
+            console.error('No active session')
+        }
         if (error.message == "Failed to fetch") {
             console.error('Network connection failed!')
         }
+
         throw error; // no session
     }
 }

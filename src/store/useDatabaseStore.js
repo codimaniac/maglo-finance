@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { databases } from "@/lib/appwrite";
+import { checkSession, databases } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 
 export const useDatabaseStore = create((set, get) => ({
   users: [],
   invoices: [],
-  paymensts: [],
+  payments: [],
   vatsummary: [],
   loading: false,
   error: null,
@@ -71,6 +71,17 @@ export const useDatabaseStore = create((set, get) => ({
     }
   },
 
+  getUserDetails: async () => {
+    set({ loading: true, error: null })
+    try {
+      const res = await checkSession()
+
+      set({ user: res, loading: false })
+    } catch (err) {
+      set({ loading: false, error: err.message })
+    }
+  },
+
   getTotals: () => {
     const invoices = get().invoices;
     const paid = invoices.filter((invoice) => invoice.status === "Paid");
@@ -83,7 +94,10 @@ export const useDatabaseStore = create((set, get) => ({
 
     return {
       totalInvoices,
+      noOfInvoices: invoices.length,
       totalPaid,
+      noOfPaidInvoices: paid.length,
+      noOfUnpaidInvoices: unpaid.length,
       pendingPayments,
       totalVAT,
     };

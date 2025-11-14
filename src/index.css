@@ -39,6 +39,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-paid-bg: var(--paid-bg);
+  --color-paid-color: var(--paid-color );
+  --color-unpaid-bg: var(--unpaid-bg);
+  --color-unpaid-color: var(--unpaid-color );
 }
 
 :root {
@@ -64,8 +68,8 @@
   --text-1: oklch(0.247 0.025 264);
   --text-2: oklch(0.695 0.027 256);
   --text-3: oklch(0.577 0.03 288);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-1: oklch(0.63 0.124 163);
+  --chart-2: oklch(0.892 0.192 122);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
@@ -77,6 +81,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --paid-bg: oklch(0.967 0.049 160);
+  --paid-color: oklch(0.663 0.16 152);
+  --unpaid-bg: oklch(0.965 0.017 17);
+  --unpaid-color: oklch(0.653 0.183 24);
 }
 
 .dark {

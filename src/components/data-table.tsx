@@ -42,7 +42,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { useDatabaseStore } from "@/store/useDatabaseStore";
 
 // Default data for fallback
 const defaultData: Invoice[] = [
@@ -109,185 +116,188 @@ export const exactMatchFilter: FilterFn<any> = (
   const value = row.getValue(columnId);
 
   return value === filterValue;
+};
+
+export function getColumns(
+  handleMarkAsPaid: () => void
+): ColumnDef<Invoice>[] {
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "clientName",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Client Name
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="ml-3">{row.getValue("clientName")}</div>
+      ),
+    },
+    {
+      accessorKey: "clientEmail",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Client Email
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="ml-3 lowercase">{row.getValue("clientEmail")}</div>
+      ),
+    },
+    {
+      accessorKey: "totalAmount",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Total Amount
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("totalAmount"));
+
+        // Format the amount as a dollar amount
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+
+        return <div className="ml-3 font-medium">{formatted}</div>;
+      },
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div
+          className={`ml-3 px-3 py-2 w-fit rounded-sm font-semibold capitalize ${
+            row.getValue("status") == "Paid" ? "bg-paid-bg text-paid-color" : ""
+          } ${
+            row.getValue("status") == "Unpaid"
+              ? "bg-unpaid-bg text-unpaid-color"
+              : ""
+          } `}
+        >
+          {row.getValue("status")}
+        </div>
+      ),
+      filterFn: exactMatchFilter,
+    },
+    {
+      accessorKey: "dueDate",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Due Date
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const dueDate = new Date(row.getValue("dueDate"));
+        const formatted = dueDate.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+        return <div className="ml-3">{formatted}</div>;
+      },
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const invoice = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={handleMarkAsPaid}
+              >
+                Mark as paid
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(invoice.$id)}
+              >
+                Edit Invoice
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(invoice.$id)}
+              >
+                Delete invoice
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 }
 
-export const columns: ColumnDef<Invoice>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "clientName",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Client Name
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="ml-3">{row.getValue("clientName")}</div>,
-  },
-  {
-    accessorKey: "clientEmail",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Client Email
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="ml-3 lowercase">{row.getValue("clientEmail")}</div>
-    ),
-  },
-  {
-    accessorKey: "totalAmount",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Total Amount
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("totalAmount"));
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <div className="ml-3 font-medium">{formatted}</div>;
-    },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div
-        className={`ml-3 px-3 py-2 w-fit rounded-sm font-semibold capitalize ${
-          row.getValue("status") == "Paid" ? "bg-green-100 text-green-600" : ""
-        } ${
-          row.getValue("status") == "Unpaid" ? "bg-red-100 text-red-600" : ""
-        } `}
-      >
-        {row.getValue("status")}
-      </div>
-    ),
-    filterFn: exactMatchFilter,
-  },
-  {
-    accessorKey: "dueDate",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Due Date
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const dueDate = new Date(row.getValue("dueDate"));
-      const formatted = dueDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-      return <div className="ml-3">{formatted}</div>;
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const invoice = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            {/* <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(invoice.$id)}
-            >
-              Copy invoice ID
-            </DropdownMenuItem> */}
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(invoice.$id)}
-            >
-              Mark as paid
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(invoice.$id)}
-            >
-              Edit Invoice
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(invoice.$id)}
-            >
-              Delete invoice
-            </DropdownMenuItem>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuItem>View client</DropdownMenuItem>
-            <DropdownMenuItem>View invoice details</DropdownMenuItem> */}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
 export function DataTable({ invoiceData = defaultData }: DataTableProps) {
+  const { updateInvoice } = useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const handleMarkAsPaid = () => updateInvoice(invoice.$id, { status: "Paid" })
+  const columns = getColumns(handleMarkAsPaid)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -319,14 +329,14 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
     { value: "Unpaid", label: "Unpaid" },
   ];
 
-  const statusColumn = table.getColumn("status")
+  const statusColumn = table.getColumn("status");
   const filterValue = statusColumn?.getFilterValue() as string | undefined;
 
   return (
     <div className="w-full px-4 lg:px-6">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Client Name..."
+          placeholder="Search Client Name..."
           value={
             (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
           }
@@ -338,7 +348,7 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
         <Select
           value={filterValue ?? ""}
           onValueChange={(value) => {
-            statusColumn?.setFilterValue(value === " " ? undefined : value)
+            statusColumn?.setFilterValue(value === " " ? undefined : value);
           }}
         >
           <SelectTrigger className="ml-auto">
@@ -347,13 +357,11 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
           </SelectTrigger>
           <SelectContent align="end">
             <SelectItem value=" ">All Status</SelectItem>
-            {
-              statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))
-            }
+            {statusOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

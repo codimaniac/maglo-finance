@@ -11,6 +11,8 @@ import { account, checkSession } from "@/lib/appwrite";
 import { useDatabaseStore } from "@/store/useDatabaseStore";
 import { toast } from "react-toastify";
 import { useStateStore } from "@/store/useStateStore";
+import { ChartBarMultiple } from "@/components/chart-bar-multiple";
+import { ChartPieLegend } from "@/components/chart-pie-legend";
 
 /** @type {import('react').CSSProperties} */
 const style = {
@@ -29,6 +31,7 @@ export default function Dashboard() {
         toast.success(`Welcome back, ${user.name || user.email}!`)
         setHasShownWelcome(true)
       }
+      console.log(user)
     });
     fetchInvoices();
   }, []);
@@ -46,8 +49,10 @@ export default function Dashboard() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
               <SectionCards />
-              <div className="px-4 lg:px-6">
+              <div className="flex flex-col gap-8 px-4 lg:px-6">
+                <ChartPieLegend />
                 <ChartAreaInteractive />
+                <ChartBarMultiple />
               </div>
               {/* Data Table goes here */}
               <DataTable invoiceData={invoices}/>

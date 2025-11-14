@@ -44,14 +44,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: IconHome,
       },
       {
-        title: "Transactions",
-        url: "/transactions",
-        icon: IconTransactionDollar,
-      },
-      {
         title: "Invoices",
         url: "/invoices",
         icon: IconInvoice,
+      },
+      {
+        title: "Transactions",
+        url: "/transactions",
+        icon: IconTransactionDollar,
       },
       {
         title: "VAT Summaries",
