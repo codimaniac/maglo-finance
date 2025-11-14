@@ -4,6 +4,7 @@ const client = new Client()
     .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
     .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
 import App from '../App';
+import { data } from "react-router";
 
 const account = new Account(client);
 const databases = new Databases(client);
@@ -22,7 +23,11 @@ const createUser = async (userName, userEmail, userPassword) => {
         const AppwriteError = {
             message: error.message,
             code: error.code
-        };
+        };        
+
+        if (error.message == "Failed to fetch") {
+            AppwriteError.message = 'Network connection failed!'
+        }
 
         throw AppwriteError;
     }
@@ -34,6 +39,27 @@ const loginUser = async (userEmail, userPassword, rememberUser) => {
             email: userEmail,
             password: userPassword
         });
+
+        const user = await checkIfDocumentExists(
+            import.meta.env.VITE_APPWRITE_DATABASE_ID,
+            import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
+            session.userId
+        );
+
+        if (!user) {
+            const newUser = await databases.createDocument(
+                import.meta.env.VITE_APPWRITE_DATABASE_ID,
+                import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
+                session.userId,
+                {
+                    firstName: session.name.split(" ")[0] || "",
+                    lastName: session.name.split(" ")[1] || "",
+                    email: session.email
+                }
+            );
+
+            console.log('New user document created:', newUser);
+        }
 
         if (rememberUser) {
             localStorage.setItem('rememberMe', 'true')
@@ -47,6 +73,10 @@ const loginUser = async (userEmail, userPassword, rememberUser) => {
             message: error.message,
             code: error.code
         };
+
+        if (error.message == "Failed to fetch") {
+            AppwriteError.message = 'Network connection failed!'
+        }
 
         throw AppwriteError;
     }
@@ -64,13 +94,25 @@ const updateName = async (name) => {
 const checkSession = async () => {
     try {
         const user = await account.get();
-        
+
         return user; // user is logged in
     } catch (error) {
         if (error.message == "Failed to fetch") {
             console.error('Network connection failed!')
         }
         throw error; // no session
+    }
+}
+
+const checkIfDocumentExists = async (databaseId, collectionId, documentId) => {
+    try {
+        const doc = await databases.getDocument(databaseId, collectionId, documentId);
+        return !!doc;
+    } catch (error) {
+        if (error.code === 404) {
+            return false;
+        }
+        throw error;
     }
 }
 

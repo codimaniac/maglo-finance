@@ -30,60 +30,67 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Link } from "react-router"
+import { Link, Navigate, useNavigate } from "react-router"
 import { logoutUser } from "@/lib/appwrite"
 import { toast } from "react-toastify"
 
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: IconHome,
-    },
-    {
-      title: "Transactions",
-      url: "/transactions",
-      icon: IconTransactionDollar,
-    },
-    {
-      title: "Invoices",
-      url: "/invoices",
-      icon: IconInvoice,
-    },
-    {
-      title: "VAT Summaries",
-      url: "/vat-summaries",
-      icon: IconTax,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: IconSettings,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Help",
-      url: "#",
-      icon: IconHelp,
-      handlesignout: null,
-    },
-    {
-      title: "Logout",
-      url: "/signin",
-      icon: IconLogout,
-      handlesignout: () => {
-        logoutUser().then(() => console.log("User logged out")).catch((error) => {
-          console.error("Error logging out user:", error)
-          toast.error("Error logging out. Please try again.")
-        })
-      },
-    },
-  ],
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const navigate = useNavigate();
+  const data = {
+    navMain: [
+      {
+        title: "Dashboard",
+        url: "/",
+        icon: IconHome,
+      },
+      {
+        title: "Transactions",
+        url: "/transactions",
+        icon: IconTransactionDollar,
+      },
+      {
+        title: "Invoices",
+        url: "/invoices",
+        icon: IconInvoice,
+      },
+      {
+        title: "VAT Summaries",
+        url: "/vat-summaries",
+        icon: IconTax,
+      },
+      {
+        title: "Settings",
+        url: "/settings",
+        icon: IconSettings,
+      },
+    ],
+    navSecondary: [
+      {
+        title: "Help",
+        url: "#",
+        icon: IconHelp,
+        handlesignout: null,
+      },
+      {
+        title: "Logout",
+        url: null,
+        icon: IconLogout,
+        handlesignout: () => {
+          logoutUser().then(() => {
+            console.log("User logged out")
+            toast.success("Logged out successfully")
+
+            navigate('/signin' )
+          })
+          .catch((error) => {
+            console.error("Error logging out user:", error)
+            toast.error("Error logging out. Please try again.")
+          })
+        },
+      },
+    ],
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

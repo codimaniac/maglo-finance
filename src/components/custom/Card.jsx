@@ -6,7 +6,7 @@ const Card = ({ active, title, value }) => {
         <div className={`rounded-full bg-sidebar-accent p-4 ${ active ? "!bg-[#4E5257]" : ""}`}><FaWallet className={`text-[--text-1] ${active ? "!text-primary" : ""}`}/></div>
         <div className="flex flex-col gap-2">
             <div className="text-sm opacity-70 font-light">{title}</div>
-            <div className="text-3xl font-semibold">${value}</div>
+            <div className="text-3xl font-semibold">{value}</div>
         </div>
     </div>
   )

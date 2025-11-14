@@ -7,7 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import data from "../app/dashboard/data.json";
 import { useEffect } from "react";
-import { account, checkSession } from "@/lib/appwrite";
+import { useDatabaseStore } from "@/store/useDatabaseStore";
 
 /** @type {import('react').CSSProperties} */
 const style = {
@@ -16,9 +16,7 @@ const style = {
 };
 
 export default function VATSummaries() {
-  useEffect(() => {
-    checkSession().then((user) => console.log(user.email))
-  }, []);
+  const invoices = useDatabaseStore((state) => state.invoices);
 
   return (
     <SidebarProvider style={style}>
@@ -29,7 +27,7 @@ export default function VATSummaries() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
               {/* Data Table goes here */}
-              <DataTable />
+              <DataTable invoiceData={invoices}/>
             </div>
           </div>
         </div>

@@ -76,13 +76,15 @@ export const useDatabaseStore = create((set, get) => ({
     const paid = invoices.filter((invoice) => invoice.status === "Paid");
     const unpaid = invoices.filter((invoice) => invoice.status === "Unpaid");
 
-    const totalPaid = paid.reduce((sum, invoice) => sum + invoice.total, 0);
+    const totalInvoices = invoices.reduce((sum, invoice) => sum + invoice.totalAmount, 0);
+    const totalPaid = paid.reduce((sum, invoice) => sum + invoice.totalAmount, 0);
     const totalVAT = paid.reduce((sum, invoice) => sum + invoice.vatAmount, 0);
+    const pendingPayments = unpaid.reduce((sum, invoice) => sum + invoice.totalAmount, 0);
 
     return {
-      totalInvoices: invoices.length,
+      totalInvoices,
       totalPaid,
-      pendingPayments: unpaid.length,
+      pendingPayments,
       totalVAT,
     };
   },

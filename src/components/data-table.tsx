@@ -1,22 +1,29 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   useReactTable,
   VisibilityState,
-} from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+} from "@tanstack/react-table";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  FilterIcon,
+  MoreHorizontal,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -25,8 +32,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -34,12 +41,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 // Default data for fallback
 const defaultData: Invoice[] = [
   {
-    id: "m5gr84i9",
+    $id: "m5gr84i9",
     clientName: "Ken Smith",
     clientEmail: "ken99@example.com",
     totalAmount: 316,
@@ -47,7 +55,7 @@ const defaultData: Invoice[] = [
     status: "Paid",
   },
   {
-    id: "3u1reuv4",
+    $id: "3u1reuv4",
     clientName: "Abe Johnson",
     clientEmail: "Abe45@example.com",
     totalAmount: 242,
@@ -55,15 +63,15 @@ const defaultData: Invoice[] = [
     status: "Paid",
   },
   {
-    id: "derv1ws0",
+    $id: "derv1ws0",
     clientName: "Monserrat Lee",
     clientEmail: "Monserrat44@example.com",
     totalAmount: 837,
     dueDate: "2023-11-25",
-    status: "Pending",
+    status: "Unpaid",
   },
   {
-    id: "5kma53ae",
+    $id: "5kma53ae",
     clientName: "Silas Brown",
     clientEmail: "Silas22@example.com",
     totalAmount: 874,
@@ -71,26 +79,36 @@ const defaultData: Invoice[] = [
     status: "Paid",
   },
   {
-    id: "bhqecj4p",
+    $id: "bhqecj4p",
     clientName: "Carmella Garcia",
     clientEmail: "carmella@example.com",
     totalAmount: 721,
     dueDate: "2023-11-10",
     status: "Unpaid",
   },
-]
+];
 
 export type Invoice = {
-  id: string
-  clientName: string
-  clientEmail: string
-  totalAmount: number
-  dueDate: string
-  status: "Pending" | "Paid" | "Unpaid"
-}
+  $id: string;
+  clientName: string;
+  clientEmail: string;
+  totalAmount: number;
+  dueDate: string;
+  status: "Paid" | "Unpaid";
+};
 
 interface DataTableProps {
-  invoiceData?: Invoice[]
+  invoiceData?: Invoice[];
+}
+
+export const exactMatchFilter: FilterFn<any> = (
+  row: Row<any>,
+  columnId: string,
+  filterValue: any
+) => {
+  const value = row.getValue(columnId);
+
+  return value === filterValue;
 }
 
 export const columns: ColumnDef<Invoice>[] = [
@@ -117,16 +135,19 @@ export const columns: ColumnDef<Invoice>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
     accessorKey: "clientName",
-    header: "Client Name",
-    cell: ({ row }) => <div>{row.getValue("clientName")}</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Client Name
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="ml-3">{row.getValue("clientName")}</div>,
   },
   {
     accessorKey: "clientEmail",
@@ -139,24 +160,62 @@ export const columns: ColumnDef<Invoice>[] = [
           Client Email
           <ArrowUpDown />
         </Button>
-      )
+      );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("clientEmail")}</div>,
+    cell: ({ row }) => (
+      <div className="ml-3 lowercase">{row.getValue("clientEmail")}</div>
+    ),
   },
   {
     accessorKey: "totalAmount",
-    header: () => <div className="text-right">Total Amount</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Total Amount
+          <ArrowUpDown />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("totalAmount"))
+      const amount = parseFloat(row.getValue("totalAmount"));
 
       // Format the amount as a dollar amount
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }).format(amount)
+      }).format(amount);
 
-      return <div className="text-right font-medium">{formatted}</div>
+      return <div className="ml-3 font-medium">{formatted}</div>;
     },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div
+        className={`ml-3 px-3 py-2 w-fit rounded-sm font-semibold capitalize ${
+          row.getValue("status") == "Paid" ? "bg-green-100 text-green-600" : ""
+        } ${
+          row.getValue("status") == "Unpaid" ? "bg-red-100 text-red-600" : ""
+        } `}
+      >
+        {row.getValue("status")}
+      </div>
+    ),
+    filterFn: exactMatchFilter,
   },
   {
     accessorKey: "dueDate",
@@ -169,23 +228,23 @@ export const columns: ColumnDef<Invoice>[] = [
           Due Date
           <ArrowUpDown />
         </Button>
-      )
+      );
     },
     cell: ({ row }) => {
-      const dueDate = new Date(row.getValue("dueDate"))
+      const dueDate = new Date(row.getValue("dueDate"));
       const formatted = dueDate.toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
-      })
-      return <div>{formatted}</div>
+      });
+      return <div className="ml-3">{formatted}</div>;
     },
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const invoice = row.original
+      const invoice = row.original;
 
       return (
         <DropdownMenu>
@@ -197,29 +256,44 @@ export const columns: ColumnDef<Invoice>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(invoice.id)}
+            {/* <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(invoice.$id)}
             >
               Copy invoice ID
+            </DropdownMenuItem> */}
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(invoice.$id)}
+            >
+              Mark as paid
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(invoice.$id)}
+            >
+              Edit Invoice
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(invoice.$id)}
+            >
+              Delete invoice
+            </DropdownMenuItem>
+            {/* <DropdownMenuSeparator />
             <DropdownMenuItem>View client</DropdownMenuItem>
-            <DropdownMenuItem>View invoice details</DropdownMenuItem>
+            <DropdownMenuItem>View invoice details</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
   },
-]
+];
 
 export function DataTable({ invoiceData = defaultData }: DataTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
+  );
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data: invoiceData,
@@ -238,45 +312,50 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
+
+  const statusOptions = [
+    { value: "Paid", label: "Paid" },
+    { value: "Unpaid", label: "Unpaid" },
+  ];
+
+  const statusColumn = table.getColumn("status")
+  const filterValue = statusColumn?.getFilterValue() as string | undefined;
 
   return (
-    <div className="w-full p-6">
+    <div className="w-full px-4 lg:px-6">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("clientEmail")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter Client Name..."
+          value={
+            (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("clientEmail")?.setFilterValue(event.target.value)
+            table.getColumn("clientName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Select
+          value={filterValue ?? ""}
+          onValueChange={(value) => {
+            statusColumn?.setFilterValue(value === " " ? undefined : value)
+          }}
+        >
+          <SelectTrigger className="ml-auto">
+            <FilterIcon />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem value=" ">All Status</SelectItem>
+            {
+              statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))
+            }
+          </SelectContent>
+        </Select>
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -293,7 +372,7 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -353,5 +432,5 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
