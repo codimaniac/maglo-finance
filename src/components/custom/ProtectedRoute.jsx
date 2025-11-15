@@ -14,7 +14,7 @@ const ProtectedRoute = ({children}) => {
             .finally(() => setLoading(false))
     }, [])
 
-    console.log(user)
+    // console.log(user)
 
     
     if (loading) return <LoadingState />

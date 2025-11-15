@@ -7,12 +7,7 @@ import { useNavigate } from "react-router";
 
 export default function Login() {
   const navigate = useNavigate();
-  useEffect(() => {
-    window.addEventListener("unload", () => {
-      checkSession().then(navigate("/"));
-    });
-  });
-
+  
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">

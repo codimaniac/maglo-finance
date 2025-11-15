@@ -50,6 +50,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useDatabaseStore } from "@/store/useDatabaseStore";
+import { toast } from "react-toastify";
 
 // Default data for fallback
 const defaultData: Invoice[] = [
@@ -119,7 +120,8 @@ export const exactMatchFilter: FilterFn<any> = (
 };
 
 export function getColumns(
-  handleMarkAsPaid: () => void
+  updateInvoice: (id: string, update: object) => void,
+  deleteInvoice: (id: string, update: object) => void
 ): ColumnDef<Invoice>[] {
   return [
     {
@@ -271,7 +273,7 @@ export function getColumns(
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={handleMarkAsPaid}
+                onClick={() => updateInvoice(invoice.$id, {status: "Paid"}).then(() => toast.success("Invoice marked as paid")).catch(() => toast.error("Failed to update invoice"))}
               >
                 Mark as paid
               </DropdownMenuItem>
@@ -281,7 +283,7 @@ export function getColumns(
                 Edit Invoice
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(invoice.$id)}
+                onClick={() => deleteInvoice(invoice.$id).then(() => toast.success("Invoice deleted")).catch(() => toast.error("Failed to delete invoice"))}
               >
                 Delete invoice
               </DropdownMenuItem>
@@ -294,10 +296,9 @@ export function getColumns(
 }
 
 export function DataTable({ invoiceData = defaultData }: DataTableProps) {
-  const { updateInvoice } = useDatabaseStore();
+  const { updateInvoice, deleteInvoice } = useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const handleMarkAsPaid = () => updateInvoice(invoice.$id, { status: "Paid" })
-  const columns = getColumns(handleMarkAsPaid)
+  const columns = getColumns(updateInvoice, deleteInvoice)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );

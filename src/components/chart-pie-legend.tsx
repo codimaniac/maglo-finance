@@ -42,11 +42,10 @@ export function ChartPieLegend() {
     const totalNoOfUnpaidInvoices = totals.noOfUnpaidInvoices || 0
     
     const chartData = [
-    { status: "paid", invoices: totalNoOfPaidInvoices, fill: "var(--color-paid)" },
-    { status: "unpaid", invoices: totalNoOfUnpaidInvoices, fill: "var(--color-unpaid)" },
+    { status: "paid", count: totalNoOfPaidInvoices, fill: "var(--color-paid)" },
+    { status: "unpaid", count: totalNoOfUnpaidInvoices, fill: "var(--color-unpaid)" },
     ]
-
-    console.log('Totals in ChartPieLegend:', totals)
+    
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -60,7 +59,7 @@ export function ChartPieLegend() {
         >
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false}/>
-            <Pie data={chartData} dataKey="invoices" />
+            <Pie data={chartData} dataKey="count" nameKey="status" />
             <ChartLegend
               content={<ChartLegendContent nameKey="status" />}
               className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"

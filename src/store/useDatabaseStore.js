@@ -3,7 +3,7 @@ import { checkSession, databases } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
 
 export const useDatabaseStore = create((set, get) => ({
-  users: [],
+  user: [],
   invoices: [],
   payments: [],
   vatsummary: [],
@@ -66,6 +66,7 @@ export const useDatabaseStore = create((set, get) => ({
       set({
         invoices: get().invoices.filter((inv) => inv.$id !== id),
       });
+      console.log("Invoice deleted successfully");
     } catch (err) {
       set({ error: err.message });
     }

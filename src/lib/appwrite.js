@@ -40,27 +40,6 @@ const loginUser = async (userEmail, userPassword, rememberUser) => {
             password: userPassword
         });
 
-        const user = await checkIfDocumentExists(
-            import.meta.env.VITE_APPWRITE_DATABASE_ID,
-            import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
-            session.userId
-        );
-
-        if (!user.$id || !user.firstName || !user.lastName || !user.email) {
-            const newUser = await databases.createDocument(
-                import.meta.env.VITE_APPWRITE_DATABASE_ID,
-                import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
-                session.userId,
-                {
-                    firstName: session.name?.split(" ")[0] || "",
-                    lastName: session.name?.split(" ")[1] || "",
-                    email: session?.email
-                }
-            );
-
-            console.log('New user document created:', newUser);
-        }
-
         if (rememberUser) {
             localStorage.setItem('rememberMe', 'true')
         } else {
@@ -116,6 +95,7 @@ const checkIfDocumentExists = async (databaseId, collectionId, documentId) => {
         if (error.code === 404) {
             return false;
         }
+        console.error('Error checking document existence:', error.message);
         throw error;
     }
 }
@@ -131,4 +111,4 @@ const logoutUser = async () => {
     }
 }
 
-export { client, account, databases, createUser, loginUser, updateName, checkSession, logoutUser };
+export { client, account, databases, createUser, loginUser, updateName, checkSession, logoutUser, checkIfDocumentExists };
