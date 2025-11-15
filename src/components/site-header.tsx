@@ -18,8 +18,6 @@ export function SiteHeader({heading, user}: SiteHeaderProps) {
 
   useEffect(() => {
     setUserDetails(user);
-
-    console.log('User details updated:', user);
   }, [user]);
 
   return (
