@@ -52,8 +52,9 @@ function App() {
         setHasShownWelcome(true)
       }
       console.log(user)
+      fetchInvoices(user.$Id);
     });
-    fetchInvoices();
+    
   }, []);
 
   useEffect(() => {
