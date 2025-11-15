@@ -34,7 +34,7 @@ export function SignupForm({
 
     createUser(name, email, password)
       .then(() => {
-        toast.success("Logged in successfully!");
+        toast.success("Account created successfully!");
         navigate("/");
       })
       .catch((error) => {
