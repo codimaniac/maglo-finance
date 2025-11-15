@@ -26,6 +26,7 @@ import {
 
 import { useDatabaseStore } from "../store/useDatabaseStore"
 import { toast } from "react-toastify";
+import { toLocalDateTimeInput } from "@/lib/format-date";
 
 // ---------------------
 // Validation Schema
@@ -75,12 +76,13 @@ export default function InvoiceForm({
   // Load initial values when editing
   useEffect(() => {
     if (mode === "edit" && initialData) {
+        console.log("Loading initial data into form:", toLocalDateTimeInput(initialData.dueDate));
       form.reset({
         clientName: initialData.clientName || "",
         clientEmail: initialData.clientEmail || "",
         amount: initialData.amount || 0,
-        vatPercentage: initialData.vat || 0,
-        dueDate: initialData.dueDate || "",
+        vatPercentage: initialData.vatPercentage || 0,
+        dueDate: toLocalDateTimeInput(initialData.dueDate) || "",
         status: initialData.status || "Unpaid",
       });
     }
@@ -218,7 +220,7 @@ export default function InvoiceForm({
             <FormItem>
               <FormLabel>Due Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="datetime-local" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

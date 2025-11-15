@@ -108,6 +108,10 @@ export type Invoice = {
 
 interface DataTableProps {
   invoiceData?: Invoice[];
+  getColumns: (
+    updateInvoice?: (id: string, update: object) => void,
+    deleteInvoice?: (id: string) => void
+  ) => ColumnDef<Invoice>[];
 }
 
 export const exactMatchFilter: FilterFn<any> = (
@@ -120,7 +124,7 @@ export const exactMatchFilter: FilterFn<any> = (
   return value === filterValue;
 };
 
-export function getColumns(
+export function getDefaultColumns(
   updateInvoice: (id: string, update: object) => void,
   deleteInvoice: (id: string) => void
 ): ColumnDef<Invoice>[] {
@@ -278,11 +282,7 @@ export function getColumns(
               >
                 Mark as paid
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(invoice.$id)}
-              >
-                Edit Invoice
-              </DropdownMenuItem>
+              <InvoiceFormModal mode='edit' initialData={invoice} trigger={<span className="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">Edit Invoice</span>} />
               <DropdownMenuItem
                 onClick={() => deleteInvoice(invoice.$id).then(() => toast.success("Invoice deleted")).catch(() => toast.error("Failed to delete invoice"))}
               >
@@ -296,7 +296,7 @@ export function getColumns(
   ];
 }
 
-export function DataTable({ invoiceData = defaultData }: DataTableProps) {
+export function DataTable({ invoiceData = defaultData, getColumns = getDefaultColumns  }: DataTableProps) {
   const { updateInvoice, deleteInvoice } = useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const columns = getColumns(updateInvoice, deleteInvoice)
