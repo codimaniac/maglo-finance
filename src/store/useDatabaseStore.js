@@ -11,13 +11,13 @@ export const useDatabaseStore = create((set, get) => ({
   loading: false,
   error: null,
 
-  fetchInvoices: async () => {
+  fetchInvoices: async (userId) => {
     set({ loading: true, error: null });
     try {
       const res = await databases.listDocuments(
         import.meta.env.VITE_APPWRITE_DATABASE_ID,
         import.meta.env.VITE_APPWRITE_INVOICES_COLLECTION_ID,
-        [Query.orderDesc("$createdAt")]
+        [Query.orderDesc("$createdAt"), Query.equal("userId", userId)]
       );
       set({ invoices: res.documents, loading: false });
     } catch (err) {
