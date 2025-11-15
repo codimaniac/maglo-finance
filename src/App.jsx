@@ -15,7 +15,7 @@ function App() {
   const fetchInvoices = useDatabaseStore((state) => state.fetchInvoices);
   const getUserDetails = useDatabaseStore((state) => state.getUserDetails);
 
-    useEffect(() => {
+  useEffect(() => {
     checkSession().then(async (user) => {
       const userDocExist = await checkIfDocumentExists(
           import.meta.env.VITE_APPWRITE_DATABASE_ID,

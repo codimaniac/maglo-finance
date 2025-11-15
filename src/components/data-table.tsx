@@ -51,6 +51,7 @@ import {
 } from "./ui/select";
 import { useDatabaseStore } from "@/store/useDatabaseStore";
 import { toast } from "react-toastify";
+import InvoiceFormModal from "./invoice-form-modal";
 
 // Default data for fallback
 const defaultData: Invoice[] = [
@@ -121,7 +122,7 @@ export const exactMatchFilter: FilterFn<any> = (
 
 export function getColumns(
   updateInvoice: (id: string, update: object) => void,
-  deleteInvoice: (id: string, update: object) => void
+  deleteInvoice: (id: string) => void
 ): ColumnDef<Invoice>[] {
   return [
     {
@@ -335,7 +336,7 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
 
   return (
     <div className="w-full px-4 lg:px-6">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify- gap-8 py-4">
         <Input
           placeholder="Search Client Name..."
           value={
@@ -346,13 +347,14 @@ export function DataTable({ invoiceData = defaultData }: DataTableProps) {
           }
           className="max-w-sm"
         />
+        <InvoiceFormModal mode='create' trigger={<Button className="ml-auto">Create Invoice</Button>} />
         <Select
           value={filterValue ?? ""}
           onValueChange={(value) => {
             statusColumn?.setFilterValue(value === " " ? undefined : value);
           }}
         >
-          <SelectTrigger className="ml-auto">
+          <SelectTrigger>
             <FilterIcon />
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>

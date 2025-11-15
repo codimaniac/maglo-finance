@@ -33,6 +33,8 @@ export const useDatabaseStore = create((set, get) => ({
         invoiceData
       );
       set({ invoices: [newInvoice, ...get().invoices] });
+
+      console.log("Invoice created successfully:", newInvoice);
     } catch (err) {
       set({ error: err.message });
     }
