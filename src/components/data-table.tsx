@@ -347,7 +347,7 @@ export function DataTable({ invoiceData = defaultData, getColumns = getDefaultCo
           onChange={(event) =>
             table.getColumn("clientName")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="max-w-xs md:max-w-sm"
         />
         <InvoiceFormModal mode='create' trigger={<Button className="ml-auto text-foreground">Create Invoice</Button>} />
         <Select
@@ -356,7 +356,7 @@ export function DataTable({ invoiceData = defaultData, getColumns = getDefaultCo
             statusColumn?.setFilterValue(value === " " ? undefined : value);
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className="hidden md:flex">
             <FilterIcon />
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
