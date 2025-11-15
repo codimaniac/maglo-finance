@@ -10,3 +10,21 @@ export function toLocalDateTimeInput(isoString) {
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
+
+export function toDatePattern(date, pattern) {
+  const d = new Date(date);
+
+  if (isNaN(d.getTime())) {
+    throw new Error("Invalid date passed to format()");
+  }
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+
+  if (pattern === "yyyy-MM") {
+    return `${year}-${month}`;
+  }
+
+  throw new Error("Unsupported format pattern");
+}
+

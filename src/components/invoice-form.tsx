@@ -58,7 +58,7 @@ export default function InvoiceForm({
   initialData,
   onSuccess,
 }: InvoiceFormProps) {
-  const { user, createInvoice, updateInvoice } = useDatabaseStore();
+  const { user, createInvoice, updateInvoice, createMonthlyVATSummary } = useDatabaseStore();
   const [loading, setLoading] = useState(false);
   
   const form = useForm<InvoiceFormValues>({
@@ -76,7 +76,8 @@ export default function InvoiceForm({
   // Load initial values when editing
   useEffect(() => {
     if (mode === "edit" && initialData) {
-        console.log("Loading initial data into form:", toLocalDateTimeInput(initialData.dueDate));
+      console.log("Loading initial data into form:", toLocalDateTimeInput(initialData.dueDate));
+
       form.reset({
         clientName: initialData.clientName || "",
         clientEmail: initialData.clientEmail || "",
@@ -94,14 +95,14 @@ export default function InvoiceForm({
     const vatAmount = values.amount * (values.vatPercentage / 100);
     const totalAmount = values.amount + vatAmount;
     const userId = user?.$id;
-
-    console.log("Submitting invoice with values:", {
+    const invoice = {
         ...values,
         vatAmount,
         totalAmount,
         userId,
       }
-    )
+
+    console.log("Submitting invoice with values:", invoice)
 
     try {
       if (mode === "create") {
@@ -112,6 +113,10 @@ export default function InvoiceForm({
           userId,
         });
 
+        if (values.status === "Paid") {
+          await createMonthlyVATSummary(invoice)
+        }
+
         toast.success("Invoice created successfully");
         form.reset();
       } else if (mode === "edit" && initialData?.$id) {
@@ -121,6 +126,10 @@ export default function InvoiceForm({
           totalAmount,
           userId,
         });
+
+        if (values.status === "Paid") {
+          await createMonthlyVATSummary(invoice)
+        }
 
         toast.success("Invoice updated successfully");
       }

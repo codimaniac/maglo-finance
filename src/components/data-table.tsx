@@ -110,7 +110,8 @@ interface DataTableProps {
   invoiceData?: Invoice[];
   getColumns: (
     updateInvoice?: (id: string, update: object) => void,
-    deleteInvoice?: (id: string) => void
+    deleteInvoice?: (id: string) => void,
+    createMonthlyVATSummary?: (invoice: any) => object
   ) => ColumnDef<Invoice>[];
 }
 
@@ -126,7 +127,8 @@ export const exactMatchFilter: FilterFn<any> = (
 
 export function getDefaultColumns(
   updateInvoice: (id: string, update: object) => void,
-  deleteInvoice: (id: string) => void
+  deleteInvoice: (id: string) => void,
+  createMonthlyVATSummary: (invoice: any) => object
 ): ColumnDef<Invoice>[] {
   return [
     {
@@ -278,11 +280,11 @@ export function getDefaultColumns(
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => updateInvoice(invoice.$id, {status: "Paid"}).then(() => toast.success("Invoice marked as paid")).catch(() => toast.error("Failed to update invoice"))}
+                onClick={() => updateInvoice(invoice.$id, {status: "Paid"}).then(() => {createMonthlyVATSummary(invoice); toast.success("Invoice marked as paid")}).catch(() => toast.error("Failed to update invoice"))}
               >
                 Mark as paid
               </DropdownMenuItem>
-              <InvoiceFormModal mode='edit' initialData={invoice} trigger={<span className="focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">Edit Invoice</span>} />
+              <InvoiceFormModal mode='edit' initialData={invoice} trigger={<span className="focus:bg-accent hover:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">Edit Invoice</span>} />
               <DropdownMenuItem
                 onClick={() => deleteInvoice(invoice.$id).then(() => toast.success("Invoice deleted")).catch(() => toast.error("Failed to delete invoice"))}
               >
@@ -297,9 +299,9 @@ export function getDefaultColumns(
 }
 
 export function DataTable({ invoiceData = defaultData, getColumns = getDefaultColumns  }: DataTableProps) {
-  const { updateInvoice, deleteInvoice } = useDatabaseStore();
+  const { updateInvoice, deleteInvoice, createMonthlyVATSummary } = useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const columns = getColumns(updateInvoice, deleteInvoice)
+  const columns = getColumns(updateInvoice, deleteInvoice, createMonthlyVATSummary)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -347,7 +349,7 @@ export function DataTable({ invoiceData = defaultData, getColumns = getDefaultCo
           }
           className="max-w-sm"
         />
-        <InvoiceFormModal mode='create' trigger={<Button className="ml-auto">Create Invoice</Button>} />
+        <InvoiceFormModal mode='create' trigger={<Button className="ml-auto text-foreground">Create Invoice</Button>} />
         <Select
           value={filterValue ?? ""}
           onValueChange={(value) => {

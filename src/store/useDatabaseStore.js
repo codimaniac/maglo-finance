@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { checkSession, databases } from "@/lib/appwrite";
 import { ID, Query } from "appwrite";
+import { toDatePattern } from "@/lib/format-date";
 
 export const useDatabaseStore = create((set, get) => ({
   user: [],
   invoices: [],
   payments: [],
-  vatsummary: [],
+  monthlyvatsummary: [],
   loading: false,
   error: null,
 
@@ -19,6 +20,20 @@ export const useDatabaseStore = create((set, get) => ({
         [Query.orderDesc("$createdAt")]
       );
       set({ invoices: res.documents, loading: false });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  fetchMonthlyVATSummary: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await databases.listDocuments(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
+        [Query.orderDesc("$createdAt")]
+      );
+      set({ monthlyvatsummary: res.documents, loading: false });
     } catch (err) {
       set({ error: err.message, loading: false });
     }
@@ -104,5 +119,83 @@ export const useDatabaseStore = create((set, get) => ({
       pendingPayments,
       totalVAT,
     };
+  },
+
+  getSummaryByMonth: async (month) => {
+    try {
+      const res = await databases.listDocuments(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
+        [Query.equal("month", month)]
+      );
+
+      if (res.total === 0) return null;
+
+      return res.documents[0];
+    } catch (error) {
+      console.error("Error getting summary by month:", error.message);
+      return null;
+    }
+  },
+
+  createSummary: async (month, data) => {
+    try {
+      const res = await databases.createDocument(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
+        ID.unique(),
+        {
+          month,
+          totalVATCollected: data.totalVATCollected,
+          totalRevenue: data.totalRevenue,
+          userId: data.userId
+        }
+      );
+
+      return res;
+    } catch (error) {
+      console.error("Error creating VAT summary:", error.message);
+      return null;
+    }
+  },
+
+  updateSummary: async (vatSummaryId, data) => {
+    try {
+      const res = await databases.updateDocument(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
+        vatSummaryId,
+        {
+          ...(data.totalVATCollected !== undefined && { totalVATCollected: data.totalVATCollected }),
+          ...(data.totalRevenue !== undefined && { totalRevenue: data.totalRevenue })
+        }
+      );
+
+      return res;
+    } catch (error) {
+      console.error("Error creating VAT summary:", error.message);
+      return null;
+    }
+  },
+
+  createMonthlyVATSummary: async (invoice) => {
+    const monthKey = toDatePattern(new Date(), "yyyy-MM");
+
+    const existing = await get().getSummaryByMonth(monthKey);
+
+    const data = {
+      totalVATCollected: invoice.vatAmount,
+      totalRevenue: invoice.totalAmount,
+      userId: invoice.userId,
+    };
+
+    if (!existing) {
+      return get().createSummary(monthKey, data);
+    }
+
+    return get().updateSummary(existing.$id, {
+      totalVATCollected: existing.totalVATCollected + data.totalVATCollected,
+      totalRevenue: existing.totalRevenue + data.totalRevenue,
+    });
   },
 }));
