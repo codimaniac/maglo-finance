@@ -52,12 +52,13 @@ function App() {
         setHasShownWelcome(true)
       }
       console.log(user)
-      fetchInvoices(user.$id);
+      
     });
     
-  }, [user.$id]);
+  }, []);
 
   useEffect(() => {
+    checkSession().then(() => fetchInvoices(user.$id))
     getUserDetails()
     console.log('User state changed:', user);
   }, [user.$id])
