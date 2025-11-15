@@ -121,12 +121,26 @@ export const useDatabaseStore = create((set, get) => ({
     };
   },
 
-  getSummaryByMonth: async (month) => {
+  fetchVATSummary: async (userId) => {
+    set({ loading: true, error: null });
     try {
       const res = await databases.listDocuments(
         import.meta.env.VITE_APPWRITE_DATABASE_ID,
         import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
-        [Query.equal("month", month)]
+        [Query.orderDesc("$createdAt"), Query.equal("userId", userId)]
+      );
+      set({ monthlyvatsummary: res.documents, loading: false });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  getSummaryByMonth: async (month, userId) => {
+    try {
+      const res = await databases.listDocuments(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
+        [Query.equal("month", month), Query.equal("userId", userId)]
       );
 
       if (res.total === 0) return null;
@@ -178,10 +192,13 @@ export const useDatabaseStore = create((set, get) => ({
     }
   },
 
-  createMonthlyVATSummary: async (invoice) => {
+  upsertMonthlyVATSummary: async (invoice) => {
     const monthKey = toDatePattern(new Date(), "yyyy-MM");
 
-    const existing = await get().getSummaryByMonth(monthKey);
+    const existing = await get().getSummaryByMonth(monthKey, invoice.userId);
+
+    console.log("Existing Data: ", existing)
+    console.log("Invoice Data ", invoice)
 
     const data = {
       totalVATCollected: invoice.vatAmount,

@@ -13,6 +13,7 @@ function App() {
   const user = useDatabaseStore((state) => state.user);
   const { hasShownWelcome, setHasShownWelcome } = useStateStore()
   const fetchInvoices = useDatabaseStore((state) => state.fetchInvoices);
+  const fetchVATSummary = useDatabaseStore((state) => state.fetchVATSummary);
   const getUserDetails = useDatabaseStore((state) => state.getUserDetails);
 
   useEffect(() => {
@@ -58,7 +59,10 @@ function App() {
   }, []);
 
   useEffect(() => {
-    checkSession().then(() => fetchInvoices(user.$id))
+    checkSession().then(() => {
+      fetchInvoices(user.$id)
+      fetchVATSummary(user.$id)
+    })
     getUserDetails()
     console.log('User state changed:', user);
   }, [user.$id])

@@ -54,65 +54,43 @@ import { toast } from "react-toastify";
 import InvoiceFormModal from "./invoice-form-modal";
 
 // Default data for fallback
-const defaultData: Invoice[] = [
+const defaultData: MonthlyVATSummary[] = [
   {
-    $id: "m5gr84i9",
-    clientName: "Ken Smith",
-    clientEmail: "ken99@example.com",
-    totalAmount: 316,
-    dueDate: "2023-11-15",
-    status: "Paid",
+    $id: "824842",
+    month: "January",
+    totalVATCollected: 8249,
+    totalRevenue: 82732
   },
   {
-    $id: "3u1reuv4",
-    clientName: "Abe Johnson",
-    clientEmail: "Abe45@example.com",
-    totalAmount: 242,
-    dueDate: "2023-11-20",
-    status: "Paid",
-  },
-  {
-    $id: "derv1ws0",
-    clientName: "Monserrat Lee",
-    clientEmail: "Monserrat44@example.com",
-    totalAmount: 837,
-    dueDate: "2023-11-25",
-    status: "Unpaid",
-  },
-  {
-    $id: "5kma53ae",
-    clientName: "Silas Brown",
-    clientEmail: "Silas22@example.com",
-    totalAmount: 874,
-    dueDate: "2023-12-01",
-    status: "Paid",
-  },
-  {
-    $id: "bhqecj4p",
-    clientName: "Carmella Garcia",
-    clientEmail: "carmella@example.com",
-    totalAmount: 721,
-    dueDate: "2023-11-10",
-    status: "Unpaid",
+    $id: "824842",
+    month: "January",
+    totalVATCollected: 8249,
+    totalRevenue: 82732
+  },{
+    $id: "824842",
+    month: "January",
+    totalVATCollected: 8249,
+    totalRevenue: 82732
+  },{
+    $id: "824842",
+    month: "January",
+    totalVATCollected: 8249,
+    totalRevenue: 82732
   },
 ];
 
-export type Invoice = {
+export type MonthlyVATSummary = {
   $id: string;
-  clientName: string;
-  clientEmail: string;
-  totalAmount: number;
-  dueDate: string;
-  status: "Paid" | "Unpaid";
+  month: string;
+  totalVATCollected: number;
+  totalRevenue: number;
 };
 
 interface DataTableProps {
-  invoiceData?: Invoice[];
-  getColumns: (
-    updateInvoice?: (id: string, update: object) => void,
-    deleteInvoice?: (id: string) => void,
-    upsertMonthlyVATSummary?: (invoice: any) => object
-  ) => ColumnDef<Invoice>[];
+  data?: MonthlyVATSummary[];
+  getColumns: () => ColumnDef<MonthlyVATSummary>[];
+  hideFilter: boolean;
+  hideModalTriggerButton: boolean;
 }
 
 export const exactMatchFilter: FilterFn<any> = (
@@ -125,11 +103,7 @@ export const exactMatchFilter: FilterFn<any> = (
   return value === filterValue;
 };
 
-export function getDefaultColumns(
-  updateInvoice: (id: string, update: object) => void,
-  deleteInvoice: (id: string) => void,
-  upsertMonthlyVATSummary: (invoice: any) => object
-): ColumnDef<Invoice>[] {
+export function getDefaultColumns(): ColumnDef<MonthlyVATSummary>[] {
   return [
     {
       id: "select",
@@ -154,54 +128,62 @@ export function getDefaultColumns(
       enableHiding: false,
     },
     {
-      accessorKey: "clientName",
+      accessorKey: "month",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Client Name
+            Month
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="ml-3">{row.getValue("clientName")}</div>
+        <div className="ml-3">{row.getValue("month")}</div>
       ),
     },
     {
-      accessorKey: "clientEmail",
+      accessorKey: "totalVATCollected",
       header: ({ column }) => {
         return (
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Client Email
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="ml-3 lowercase">{row.getValue("clientEmail")}</div>
-      ),
-    },
-    {
-      accessorKey: "totalAmount",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Total Amount
+            Total VAT Collected
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue("totalAmount"));
+        const amount = parseFloat(row.getValue("totalVATCollected"));
+
+        // Format the amount as a dollar amount
+        const formatted = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(amount);
+
+        return <div className="ml-3 lowercase">{formatted}</div>
+      },
+    },
+    {
+      accessorKey: "totalRevenue",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Total Revenue
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("totalRevenue"));
 
         // Format the amount as a dollar amount
         const formatted = new Intl.NumberFormat("en-US", {
@@ -211,124 +193,20 @@ export function getDefaultColumns(
 
         return <div className="ml-3 font-medium">{formatted}</div>;
       },
-    },
-    {
-      accessorKey: "status",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        <div
-          className={`ml-3 px-3 py-2 w-fit rounded-sm font-semibold capitalize ${
-            row.getValue("status") == "Paid" ? "bg-paid-bg text-paid-color" : ""
-          } ${
-            row.getValue("status") == "Unpaid"
-              ? "bg-unpaid-bg text-unpaid-color"
-              : ""
-          } `}
-        >
-          {row.getValue("status")}
-        </div>
-      ),
-      filterFn: exactMatchFilter,
-    },
-    {
-      accessorKey: "dueDate",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Due Date
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const dueDate = new Date(row.getValue("dueDate"));
-        const formatted = dueDate.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-        return <div className="ml-3">{formatted}</div>;
-      },
-    },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const invoice = row.original;
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() =>
-                  updateInvoice(invoice.$id, { status: "Paid" })
-                    .then(() => {
-                      upsertMonthlyVATSummary(invoice);
-                      toast.success("Invoice marked as paid");
-                    })
-                    .catch(() => toast.error("Failed to update invoice"))
-                }
-              >
-                Mark as paid
-              </DropdownMenuItem>
-              <InvoiceFormModal
-                mode="edit"
-                initialData={invoice}
-                trigger={
-                  <span className="focus:bg-accent hover:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:[svg]:!text-destructive [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
-                    Edit Invoice
-                  </span>
-                }
-              />
-              <DropdownMenuItem
-                onClick={() =>
-                  deleteInvoice(invoice.$id)
-                    .then(() => toast.success("Invoice deleted"))
-                    .catch(() => toast.error("Failed to delete invoice"))
-                }
-              >
-                Delete invoice
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
-    },
+    }
   ];
 }
 
-export function DataTable({
-  invoiceData = defaultData,
+export function VATSummaryDataTable({
+  data = defaultData,
   getColumns = getDefaultColumns,
+  hideFilter = true,
+  hideModalTriggerButton = true,
 }: DataTableProps) {
   const { updateInvoice, deleteInvoice, upsertMonthlyVATSummary } =
     useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const columns = getColumns(
-    updateInvoice,
-    deleteInvoice,
-    upsertMonthlyVATSummary
-  );
+  const columns = getColumns();
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -337,7 +215,7 @@ export function DataTable({
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data: invoiceData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -360,29 +238,29 @@ export function DataTable({
     { value: "Unpaid", label: "Unpaid" },
   ];
 
-  const statusColumn = table.getColumn("status");
-  const filterValue = statusColumn?.getFilterValue() as string | undefined;
+  // const statusColumn = table.getColumn("status") || "";
+  // const filterValue = statusColumn?.getFilterValue() as string | undefined;
 
   return (
     <div className="w-full px-4 lg:px-6">
       <div className="flex items-center justify- gap-8 py-4">
         <Input
-          placeholder="Search Client Name..."
+          placeholder="Search Month..."
           value={
-            (table.getColumn("clientName")?.getFilterValue() as string) ?? ""
+            (table.getColumn("month")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("clientName")?.setFilterValue(event.target.value)
+            table.getColumn("month")?.setFilterValue(event.target.value)
           }
           className="max-w-xs md:max-w-sm"
         />
-        <InvoiceFormModal
+        { !hideModalTriggerButton &&<InvoiceFormModal
           mode="create"
           trigger={
-            <Button className="ml-auto text-foreground">Create Invoice</Button>
+            <Button className="ml-auto text-foreground">Create MonthlyVATSummary</Button>
           }
-        />
-        <Select
+        />}
+        { !hideFilter && <Select
           value={filterValue ?? ""}
           onValueChange={(value) => {
             statusColumn?.setFilterValue(value === " " ? undefined : value);
@@ -400,7 +278,7 @@ export function DataTable({
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> }
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

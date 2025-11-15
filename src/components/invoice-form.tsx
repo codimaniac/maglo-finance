@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useDatabaseStore } from "../store/useDatabaseStore"
+import { useDatabaseStore } from "../store/useDatabaseStore";
 import { toast } from "react-toastify";
 import { toLocalDateTimeInput } from "@/lib/format-date";
 
@@ -58,9 +58,10 @@ export default function InvoiceForm({
   initialData,
   onSuccess,
 }: InvoiceFormProps) {
-  const { user, createInvoice, updateInvoice, createMonthlyVATSummary } = useDatabaseStore();
+  const { user, createInvoice, updateInvoice, upsertMonthlyVATSummary } =
+    useDatabaseStore();
   const [loading, setLoading] = useState(false);
-  
+
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(InvoiceSchema),
     defaultValues: {
@@ -76,7 +77,10 @@ export default function InvoiceForm({
   // Load initial values when editing
   useEffect(() => {
     if (mode === "edit" && initialData) {
-      console.log("Loading initial data into form:", toLocalDateTimeInput(initialData.dueDate));
+      console.log(
+        "Loading initial data into form:",
+        toLocalDateTimeInput(initialData.dueDate)
+      );
 
       form.reset({
         clientName: initialData.clientName || "",
@@ -96,13 +100,13 @@ export default function InvoiceForm({
     const totalAmount = values.amount + vatAmount;
     const userId = user?.$id;
     const invoice = {
-        ...values,
-        vatAmount,
-        totalAmount,
-        userId,
-      }
+      ...values,
+      vatAmount,
+      totalAmount,
+      userId,
+    };
 
-    console.log("Submitting invoice with values:", invoice)
+    console.log("Submitting invoice with values:", invoice);
 
     try {
       if (mode === "create") {
@@ -114,7 +118,7 @@ export default function InvoiceForm({
         });
 
         if (values.status === "Paid") {
-          await createMonthlyVATSummary(invoice)
+          await upsertMonthlyVATSummary(invoice);
         }
 
         toast.success("Invoice created successfully");
@@ -128,7 +132,7 @@ export default function InvoiceForm({
         });
 
         if (values.status === "Paid") {
-          await createMonthlyVATSummary(invoice)
+          await upsertMonthlyVATSummary(invoice);
         }
 
         toast.success("Invoice updated successfully");
@@ -190,9 +194,7 @@ export default function InvoiceForm({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) =>
-                    field.onChange(parseFloat(e.target.value))
-                  }
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -211,9 +213,7 @@ export default function InvoiceForm({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) =>
-                    field.onChange(parseFloat(e.target.value))
-                  }
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
                 />
               </FormControl>
               <FormMessage />
@@ -243,10 +243,7 @@ export default function InvoiceForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select
-                defaultValue={field.value}
-                onValueChange={field.onChange}
-              >
+              <Select defaultValue={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
