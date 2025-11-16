@@ -13,6 +13,20 @@ export function toLocalDateTimeInput(isoString) {
 
 export function toDatePattern(date, pattern) {
   const d = new Date(date);
+  const monthMap = {
+    "1": "Jan",
+    "2": "Feb",
+    "3": "Mar",
+    "4": "Apr",
+    "5": "May",
+    "6": "Jun",
+    "7": "Jul",
+    "8": "Aug",
+    "9": "Sep",
+    "10": "Oct",
+    "11": "Nov",
+    "12": "Dec"
+  }
 
   if (isNaN(d.getTime())) {
     throw new Error("Invalid date passed to format()");
@@ -23,6 +37,9 @@ export function toDatePattern(date, pattern) {
 
   if (pattern === "yyyy-MM") {
     return `${year}-${month}`;
+  } else if (pattern === "MMM-yyyy") {
+    console.log(`${monthMap[month]}-${year}`)
+    return `${monthMap[month]}-${year}`;
   }
 
   throw new Error("Unsupported format pattern");

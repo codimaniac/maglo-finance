@@ -23,15 +23,12 @@ function App() {
           import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
           user.$id
       );
-      console.log('User document exists:', userDocExist);
 
       const userDoc = userDocExist ? await databases.getDocument(
           import.meta.env.VITE_APPWRITE_DATABASE_ID,
           import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID,
           user.$id
       ) : {};
-
-      console.log('User document:', userDoc);
 
       if (userDocExist && !userDoc.$id || !userDoc.firstName || !userDoc.lastName || !userDoc.email) {
           const newUser = await databases.createDocument(
@@ -44,15 +41,12 @@ function App() {
                   email: user.email || ''
               }
           );
-
-          console.log('New user document created:', newUser);
       }
 
       if (!hasShownWelcome) {
         toast.success(`Welcome back, ${user.name || user.email}!`)
         setHasShownWelcome(true)
       }
-      console.log(user)
       
     });
     

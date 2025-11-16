@@ -135,6 +135,10 @@ export const useDatabaseStore = create((set, get) => ({
     }
   },
 
+  createTransactionRecord: async (invoice) => {
+
+  },
+
   getSummaryByMonth: async (month, userId) => {
     try {
       const res = await databases.listDocuments(
@@ -193,7 +197,7 @@ export const useDatabaseStore = create((set, get) => ({
   },
 
   upsertMonthlyVATSummary: async (invoice) => {
-    const monthKey = toDatePattern(new Date(), "yyyy-MM");
+    const monthKey = toDatePattern(new Date(), "MMM-yyyy");
 
     const existing = await get().getSummaryByMonth(monthKey, invoice.userId);
 
