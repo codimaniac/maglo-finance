@@ -58,7 +58,7 @@ export default function InvoiceForm({
   initialData,
   onSuccess,
 }: InvoiceFormProps) {
-  const { user, createInvoice, updateInvoice, upsertMonthlyVATSummary } =
+  const { user, createInvoice, updateInvoice, upsertMonthlyVATSummary, createPaymentRecord } =
     useDatabaseStore();
   const [loading, setLoading] = useState(false);
 
@@ -119,6 +119,7 @@ export default function InvoiceForm({
 
         if (values.status === "Paid") {
           await upsertMonthlyVATSummary(invoice);
+          await createPaymentRecord(invoice);
         }
 
         toast.success("Invoice created successfully");
@@ -131,8 +132,9 @@ export default function InvoiceForm({
           userId,
         });
 
-        if (values.status === "Paid") {
+        if (values.status === "Paid" && initialData.status === "Unpaid") {
           await upsertMonthlyVATSummary(invoice);
+          await createPaymentRecord(invoice);
         }
 
         toast.success("Invoice updated successfully");
@@ -243,7 +245,7 @@ export default function InvoiceForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select defaultValue={field.value} onValueChange={field.onChange}>
+              <Select defaultValue={mode === "create" ? field.value : initialData.status} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

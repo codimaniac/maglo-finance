@@ -38,7 +38,6 @@ export function toDatePattern(date, pattern) {
   if (pattern === "yyyy-MM") {
     return `${year}-${month}`;
   } else if (pattern === "MMM-yyyy") {
-    console.log(`${monthMap[month]}-${year}`)
     return `${monthMap[month]}-${year}`;
   }
 

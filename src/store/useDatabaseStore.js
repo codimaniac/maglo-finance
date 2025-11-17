@@ -25,20 +25,6 @@ export const useDatabaseStore = create((set, get) => ({
     }
   },
 
-  fetchMonthlyVATSummary: async () => {
-    set({ loading: true, error: null });
-    try {
-      const res = await databases.listDocuments(
-        import.meta.env.VITE_APPWRITE_DATABASE_ID,
-        import.meta.env.VITE_APPWRITE_VAT_SUMMARIES_COLLECTION_ID,
-        [Query.orderDesc("$createdAt")]
-      );
-      set({ monthlyvatsummary: res.documents, loading: false });
-    } catch (err) {
-      set({ error: err.message, loading: false });
-    }
-  },
-
   createInvoice: async (invoiceData) => {
     try {
       const newInvoice = await databases.createDocument(
@@ -135,8 +121,45 @@ export const useDatabaseStore = create((set, get) => ({
     }
   },
 
-  createTransactionRecord: async (invoice) => {
+  fetchPayments: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await databases.listDocuments(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_PAYMENTS_COLLECTION_ID,
+        [Query.orderDesc("$createdAt"), Query.equal("userId", userId)]
+      );
+      set({ payments: res.documents, loading: false });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
 
+  createPaymentRecord: async (invoice) => {
+    const paymentData = {
+      invoiceId: invoice.$id,
+      userId: invoice.userId,
+      paymentAmount: invoice.amount,
+      paymentDate: new Date(),
+      vatIncluded: invoice.vatAmount
+    }
+    console.log("Creating new payment record: ", invoice)
+    console.log("Payment data: ", paymentData)
+
+    try {
+      const paymentRecord = await databases.createDocument(
+        import.meta.env.VITE_APPWRITE_DATABASE_ID,
+        import.meta.env.VITE_APPWRITE_PAYMENTS_COLLECTION_ID,
+        ID.unique(),
+        paymentData
+      )
+
+      set({ payments: [paymentRecord, ...get().payments] });
+
+      console.log("Payment record created successfully: ", invoice)
+    } catch (err) {
+      set({ error: err.message });
+    }
   },
 
   getSummaryByMonth: async (month, userId) => {
@@ -157,6 +180,7 @@ export const useDatabaseStore = create((set, get) => ({
   },
 
   createSummary: async (month, data) => {
+    set({ loading: true, error: null })
     try {
       const res = await databases.createDocument(
         import.meta.env.VITE_APPWRITE_DATABASE_ID,
@@ -170,14 +194,20 @@ export const useDatabaseStore = create((set, get) => ({
         }
       );
 
-      return res;
-    } catch (error) {
+      set({ loading: false })
+
+      return res
+    } catch (err) {
       console.error("Error creating VAT summary:", error.message);
-      return null;
+
+      set({ error: err.message, loading: false })
+
+      return null
     }
   },
 
   updateSummary: async (vatSummaryId, data) => {
+    set({ loading: true, error: null })
     try {
       const res = await databases.updateDocument(
         import.meta.env.VITE_APPWRITE_DATABASE_ID,
@@ -189,9 +219,14 @@ export const useDatabaseStore = create((set, get) => ({
         }
       );
 
+      set({ loading: false })
+
       return res;
-    } catch (error) {
+    } catch (err) {
       console.error("Error creating VAT summary:", error.message);
+
+      set({ error: err.message })
+
       return null;
     }
   },
@@ -201,9 +236,6 @@ export const useDatabaseStore = create((set, get) => ({
 
     const existing = await get().getSummaryByMonth(monthKey, invoice.userId);
 
-    console.log("Existing Data: ", existing)
-    console.log("Invoice Data ", invoice)
-
     const data = {
       totalVATCollected: invoice.vatAmount,
       totalRevenue: invoice.totalAmount,
@@ -211,12 +243,19 @@ export const useDatabaseStore = create((set, get) => ({
     };
 
     if (!existing) {
-      return get().createSummary(monthKey, data);
+      await get().createSummary(monthKey, data);
+
+
+      return null
     }
 
-    return get().updateSummary(existing.$id, {
+    await get().updateSummary(existing.$id, {
       totalVATCollected: existing.totalVATCollected + data.totalVATCollected,
       totalRevenue: existing.totalRevenue + data.totalRevenue,
     });
+
+    await get().fetchVATSummary(invoice.userId)
+
+    return null
   },
 }));

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -111,7 +111,8 @@ interface DataTableProps {
   getColumns: (
     updateInvoice?: (id: string, update: object) => void,
     deleteInvoice?: (id: string) => void,
-    upsertMonthlyVATSummary?: (invoice: any) => object
+    upsertMonthlyVATSummary?: (invoice: any) => object,
+    createPaymentRecord?: (invoice: any) => object
   ) => ColumnDef<Invoice>[];
 }
 
@@ -128,7 +129,8 @@ export const exactMatchFilter: FilterFn<any> = (
 export function getDefaultColumns(
   updateInvoice: (id: string, update: object) => void,
   deleteInvoice: (id: string) => void,
-  upsertMonthlyVATSummary: (invoice: any) => object
+  upsertMonthlyVATSummary: (invoice: any) => object,
+  createPaymentRecord: (invoice: any) => object
 ): ColumnDef<Invoice>[] {
   return [
     {
@@ -268,6 +270,7 @@ export function getDefaultColumns(
       enableHiding: false,
       cell: ({ row }) => {
         const invoice = row.original;
+        const [isProcessing, setIsProcessing] = useState(false);
 
         return (
           <DropdownMenu>
@@ -280,14 +283,18 @@ export function getDefaultColumns(
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() =>
+                onClick={() => {
+                  if (isProcessing) return;
+                  setIsProcessing(true)
                   updateInvoice(invoice.$id, { status: "Paid" })
                     .then(() => {
                       upsertMonthlyVATSummary(invoice);
-                      toast.success("Invoice marked as paid");
+                      createPaymentRecord(invoice);
                     })
+                    .then(() => toast.success("Invoice marked as paid"))
                     .catch(() => toast.error("Failed to update invoice"))
-                }
+                    .finally(() => setIsProcessing(false))
+                }}
               >
                 Mark as paid
               </DropdownMenuItem>
@@ -321,13 +328,14 @@ export function DataTable({
   invoiceData = defaultData,
   getColumns = getDefaultColumns,
 }: DataTableProps) {
-  const { updateInvoice, deleteInvoice, upsertMonthlyVATSummary } =
+  const { updateInvoice, deleteInvoice, upsertMonthlyVATSummary, createPaymentRecord } =
     useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const columns = getColumns(
     updateInvoice,
     deleteInvoice,
-    upsertMonthlyVATSummary
+    upsertMonthlyVATSummary,
+    createPaymentRecord
   );
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []

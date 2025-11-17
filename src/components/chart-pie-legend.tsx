@@ -49,7 +49,7 @@ export function ChartPieLegend() {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Paid vs Unpaid</CardTitle>
+        <CardTitle>Paid vs Unpaid Invoices</CardTitle>
         <CardDescription>July - December 2025</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">

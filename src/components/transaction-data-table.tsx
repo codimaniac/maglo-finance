@@ -15,10 +15,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  FilterIcon,
-} from "lucide-react";
+import { ArrowUpDown, Copy, FilterIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,6 +37,7 @@ import {
 } from "./ui/select";
 import { useDatabaseStore } from "@/store/useDatabaseStore";
 import InvoiceFormModal from "./invoice-form-modal";
+import { toast } from "react-toastify";
 
 // Default data for fallback
 const defaultData: TransactionSummary[] = [
@@ -49,7 +47,7 @@ const defaultData: TransactionSummary[] = [
     paymentAmount: 8249,
     vatIncluded: 82732,
     paymentDate: "Nov 29, 2025",
-    userId: "83n2ie92he2828"
+    userId: "83n2ie92he2828",
   },
 ];
 
@@ -58,8 +56,8 @@ export type TransactionSummary = {
   invoiceId: string;
   paymentAmount: number;
   vatIncluded: number;
-  paymentDate: string,
-  userId: string,
+  paymentDate: string;
+  userId: string;
 };
 
 interface DataTableProps {
@@ -117,7 +115,7 @@ export function getDefaultColumns(): ColumnDef<TransactionSummary>[] {
         );
       },
       cell: ({ row }) => (
-        <div className="ml-3">{row.getValue("paymentDate")}</div>
+        <div className="ml-3">{row.getValue("paymentDate")?.split("T")[0]}</div>
       ),
     },
     {
@@ -134,7 +132,19 @@ export function getDefaultColumns(): ColumnDef<TransactionSummary>[] {
         );
       },
       cell: ({ row }) => {
-        return <div className="ml-3 lowercase">{row.getValue("invoiceId")}</div>
+        const handleCopy = () =>
+          navigator.clipboard
+            .writeText(row.getValue("invoiceId"))
+            .then(() => toast.success("Copied!"));
+        return (
+          <div
+            className="ml-3 lowercase inline-flex items-center gap-1 cursor-pointer select-none text-sm text-muted-foreground hover:text-primary transition-colors active:scale-95"
+            onClick={handleCopy}
+          >
+            {row.getValue("invoiceId")}
+            <Copy className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+          </div>
+        );
       },
     },
     {
@@ -186,7 +196,7 @@ export function getDefaultColumns(): ColumnDef<TransactionSummary>[] {
 
         return <div className="ml-3 font-medium">{formatted}</div>;
       },
-    }
+    },
   ];
 }
 
@@ -238,40 +248,46 @@ export function TransactionDataTable({
     <div className="w-full px-4 lg:px-6">
       <div className="flex items-center justify- gap-8 py-4">
         <Input
-          placeholder="Search Month..."
+          placeholder="Search Invoice ID..."
           value={
-            (table.getColumn("month")?.getFilterValue() as string) ?? ""
+            (table.getColumn("invoiceId")?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("month")?.setFilterValue(event.target.value)
+            table.getColumn("invoiceId")?.setFilterValue(event.target.value)
           }
           className="max-w-xs md:max-w-sm"
         />
-        { !hideModalTriggerButton &&<InvoiceFormModal
-          mode="create"
-          trigger={
-            <Button className="ml-auto text-foreground">Create TransactionSummary</Button>
-          }
-        />}
-        { !hideFilter && <Select
-          value={filterValue ?? ""}
-          onValueChange={(value) => {
-            statusColumn?.setFilterValue(value === " " ? undefined : value);
-          }}
-        >
-          <SelectTrigger className="hidden md:flex">
-            <FilterIcon />
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent align="end">
-            <SelectItem value=" ">All Status</SelectItem>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> }
+        {!hideModalTriggerButton && (
+          <InvoiceFormModal
+            mode="create"
+            trigger={
+              <Button className="ml-auto text-foreground">
+                Create TransactionSummary
+              </Button>
+            }
+          />
+        )}
+        {!hideFilter && (
+          <Select
+            value={filterValue ?? ""}
+            onValueChange={(value) => {
+              statusColumn?.setFilterValue(value === " " ? undefined : value);
+            }}
+          >
+            <SelectTrigger className="hidden md:flex">
+              <FilterIcon />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value=" ">All Status</SelectItem>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

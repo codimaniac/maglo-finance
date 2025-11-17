@@ -3,11 +3,11 @@ import Layout from "@/components/custom/Layout";
 import { TransactionDataTable } from "@/components/transaction-data-table";
 
 export default function Transactions() {
-  const invoices = useDatabaseStore((state) => state.invoices);
+  const payments = useDatabaseStore((state) => state.payments);
 
   return (
     <Layout heading="Transactions">
-      <TransactionDataTable />
+      <TransactionDataTable data={payments}/>
     </Layout>
   );
 }
