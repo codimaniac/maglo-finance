@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { createUser } from "@/lib/appwrite";
+import { createUser, loginUser } from "@/lib/appwrite";
 
 export function SignupForm({
   className,
@@ -34,8 +34,10 @@ export function SignupForm({
 
     createUser(name, email, password)
       .then(() => {
-        toast.success("Account created successfully!");
-        navigate("/");
+        loginUser(email, password, null).then(() => {
+          toast.success("Account created successfully!");
+          navigate("/");          
+        })
       })
       .catch((error) => {
         toast.error(`${error.message}`);
