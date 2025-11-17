@@ -59,23 +59,25 @@ const defaultData: MonthlyVATSummary[] = [
     $id: "824842",
     month: "January",
     totalVATCollected: 8249,
-    totalRevenue: 82732
+    totalRevenue: 82732,
   },
   {
     $id: "824842",
     month: "January",
     totalVATCollected: 8249,
-    totalRevenue: 82732
-  },{
+    totalRevenue: 82732,
+  },
+  {
     $id: "824842",
     month: "January",
     totalVATCollected: 8249,
-    totalRevenue: 82732
-  },{
+    totalRevenue: 82732,
+  },
+  {
     $id: "824842",
     month: "January",
     totalVATCollected: 8249,
-    totalRevenue: 82732
+    totalRevenue: 82732,
   },
 ];
 
@@ -140,9 +142,7 @@ export function getDefaultColumns(): ColumnDef<MonthlyVATSummary>[] {
           </Button>
         );
       },
-      cell: ({ row }) => (
-        <div className="ml-3">{row.getValue("month")}</div>
-      ),
+      cell: ({ row }) => <div className="ml-3">{row.getValue("month")}</div>,
     },
     {
       accessorKey: "totalVATCollected",
@@ -161,12 +161,12 @@ export function getDefaultColumns(): ColumnDef<MonthlyVATSummary>[] {
         const amount = parseFloat(row.getValue("totalVATCollected"));
 
         // Format the amount as a dollar amount
-        const formatted = new Intl.NumberFormat("en-US", {
+        const formatted = new Intl.NumberFormat("en-NG", {
           style: "currency",
-          currency: "USD",
+          currency: "NGN",
         }).format(amount);
 
-        return <div className="ml-3 lowercase">{formatted}</div>
+        return <div className="ml-3 lowercase">{formatted}</div>;
       },
     },
     {
@@ -186,14 +186,14 @@ export function getDefaultColumns(): ColumnDef<MonthlyVATSummary>[] {
         const amount = parseFloat(row.getValue("totalRevenue"));
 
         // Format the amount as a dollar amount
-        const formatted = new Intl.NumberFormat("en-US", {
+        const formatted = new Intl.NumberFormat("en-NG", {
           style: "currency",
-          currency: "USD",
+          currency: "NGN",
         }).format(amount);
 
         return <div className="ml-3 font-medium">{formatted}</div>;
       },
-    }
+    },
   ];
 }
 
@@ -246,39 +246,43 @@ export function VATSummaryDataTable({
       <div className="flex items-center justify- gap-8 py-4">
         <Input
           placeholder="Search Month..."
-          value={
-            (table.getColumn("month")?.getFilterValue() as string) ?? ""
-          }
+          value={(table.getColumn("month")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("month")?.setFilterValue(event.target.value)
           }
           className="max-w-xs md:max-w-sm"
         />
-        { !hideModalTriggerButton &&<InvoiceFormModal
-          mode="create"
-          trigger={
-            <Button className="ml-auto text-foreground">Create MonthlyVATSummary</Button>
-          }
-        />}
-        { !hideFilter && <Select
-          value={filterValue ?? ""}
-          onValueChange={(value) => {
-            statusColumn?.setFilterValue(value === " " ? undefined : value);
-          }}
-        >
-          <SelectTrigger className="hidden md:flex">
-            <FilterIcon />
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent align="end">
-            <SelectItem value=" ">All Status</SelectItem>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select> }
+        {!hideModalTriggerButton && (
+          <InvoiceFormModal
+            mode="create"
+            trigger={
+              <Button className="ml-auto text-foreground">
+                Create MonthlyVATSummary
+              </Button>
+            }
+          />
+        )}
+        {!hideFilter && (
+          <Select
+            value={filterValue ?? ""}
+            onValueChange={(value) => {
+              statusColumn?.setFilterValue(value === " " ? undefined : value);
+            }}
+          >
+            <SelectTrigger className="hidden md:flex">
+              <FilterIcon />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value=" ">All Status</SelectItem>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
       <div className="overflow-hidden rounded-md border">
         <Table>

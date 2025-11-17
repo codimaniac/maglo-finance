@@ -206,9 +206,9 @@ export function getDefaultColumns(
         const amount = parseFloat(row.getValue("totalAmount"));
 
         // Format the amount as a dollar amount
-        const formatted = new Intl.NumberFormat("en-US", {
+        const formatted = new Intl.NumberFormat("en-NG", {
           style: "currency",
-          currency: "USD",
+          currency: "NGN",
         }).format(amount);
 
         return <div className="ml-3 font-medium">{formatted}</div>;
@@ -285,7 +285,7 @@ export function getDefaultColumns(
               <DropdownMenuItem
                 onClick={() => {
                   if (isProcessing) return;
-                  setIsProcessing(true)
+                  setIsProcessing(true);
                   updateInvoice(invoice.$id, { status: "Paid" })
                     .then(() => {
                       upsertMonthlyVATSummary(invoice);
@@ -293,7 +293,7 @@ export function getDefaultColumns(
                     })
                     .then(() => toast.success("Invoice marked as paid"))
                     .catch(() => toast.error("Failed to update invoice"))
-                    .finally(() => setIsProcessing(false))
+                    .finally(() => setIsProcessing(false));
                 }}
               >
                 Mark as paid
@@ -328,8 +328,12 @@ export function DataTable({
   invoiceData = defaultData,
   getColumns = getDefaultColumns,
 }: DataTableProps) {
-  const { updateInvoice, deleteInvoice, upsertMonthlyVATSummary, createPaymentRecord } =
-    useDatabaseStore();
+  const {
+    updateInvoice,
+    deleteInvoice,
+    upsertMonthlyVATSummary,
+    createPaymentRecord,
+  } = useDatabaseStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const columns = getColumns(
     updateInvoice,

@@ -164,9 +164,9 @@ export function getDefaultColumns(): ColumnDef<TransactionSummary>[] {
         const amount = parseFloat(row.getValue("paymentAmount"));
 
         // Format the amount as a dollar amount
-        const formatted = new Intl.NumberFormat("en-US", {
+        const formatted = new Intl.NumberFormat("en-NG", {
           style: "currency",
-          currency: "USD",
+          currency: "NGN",
         }).format(amount);
 
         return <div className="ml-3 font-medium">{formatted}</div>;
@@ -189,9 +189,9 @@ export function getDefaultColumns(): ColumnDef<TransactionSummary>[] {
         const amount = parseFloat(row.getValue("vatIncluded"));
 
         // Format the amount as a dollar amount
-        const formatted = new Intl.NumberFormat("en-US", {
+        const formatted = new Intl.NumberFormat("en-NG", {
           style: "currency",
-          currency: "USD",
+          currency: "NGN",
         }).format(amount);
 
         return <div className="ml-3 font-medium">{formatted}</div>;
